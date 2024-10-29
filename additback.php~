@@ -1,0 +1,83 @@
+<?php
+
+/* 
+Plugin Name: Additback
+Plugin URI: http://www.additback.com
+Description: For sharing and displaying reccomended articles
+Author: Additback Team
+Version: 2.0 
+*/ 
+
+function aib_footer($content) {
+	echo $content;
+  echo '<script src="http://www.additback.com/code/additback-min.js"></script>';
+
+	$style = get_option( 'aib_widget_style' );
+	if ( $style == 'float' )
+  {
+ 		echo '<div class="recommendy-badge" data-max_badges="3" data-counter="1" data-style="float"></div>';
+  }
+}
+
+
+function aib_per_post($content) {
+	echo $content;
+	echo '<div class="recommendy-badge" data-max_badges="3" data-counter="1" data-url="'.get_permalink().'" style="margin: 20px 130px;"></div>';
+}
+
+
+add_action('wp_footer', 'aib_footer');
+
+$style = get_option( 'aib_widget_style' );
+if ( $style != 'float' )
+	add_action('the_content', 'aib_per_post');
+
+
+
+
+
+
+
+
+/*****************************************/
+/************ ADMIN MENU *****************/
+/*****************************************/
+
+add_action( 'admin_menu', 'my_plugin_menu' );
+
+/** Step 1. */
+function my_plugin_menu() {
+	add_options_page( 'Additback Options', 'Additback', 'manage_options', 'aib-settings', 'my_plugin_options' );
+}
+
+/** Step 3. */
+function my_plugin_options() {
+	if ( !current_user_can( 'manage_options' ) )  {
+		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+	}
+	
+	if ( isset($_POST['style']) ){
+		update_option( 'aib_widget_style', $_POST['style'] );
+	}
+	
+	$style = get_option( 'aib_widget_style' );
+	
+	echo '<div class="wrap">';
+	echo '<div id="icon-edit-pages" class="icon32"></div>';
+	echo '<h2>Additback Options</h2>';
+	echo '<h3>Please choose the Widget style.</h3>';
+	echo '<form method="POST" action="'.$_SERVER["REQUEST_URI"].'">';
+	echo '<ul>';
+	echo '<li><label>Fixed</label><input type="radio" value="fixed" '.($style=='fixed'? 'checked="checked"' : '').' name="style"><br /></li>';
+	echo '<li><label>Floating</label><input type="radio" value="float" '.($style=='float'? 'checked="checked"' : '').' name="style"></li>';
+	echo '<input class="button-primary" type="submit" value="Save Options">';
+	echo '</ul>';
+	echo '</form>';
+	echo '</div>';
+
+	if ( isset($_POST['style']) ){
+		echo '<div id="icon-options-general" class="icon32"></div><h3>Settings updated.</h3>';
+	}
+}
+  
+?>
